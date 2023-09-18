@@ -37,7 +37,7 @@ class AuthService {
           email: email.trim(), password: password.trim());
       User user = result.user as User;
 
-      //create a new document for the user with the uid
+      // create a new document for the user with the uid
       teacher
           ? await DatabaseService(uid: user.uid)
               .createNewTeacherData(name, [], true, 0)
