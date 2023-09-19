@@ -43,44 +43,46 @@ class _RegisterState extends State<Register> {
         key: _formkey,
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
-          child: Column(
-            children: [
-              SizedBox(height: 20),
-              WidgetUtils.createInputForm(
-                  "Email", "Enter an email", emailController, false),
-              SizedBox(height: 20),
-              WidgetUtils.createInputForm(
-                  "Password",
-                  "Password should be 8+ characters long",
-                  passwordController,
-                  true),
-              SizedBox(
-                height: 20,
-              ),
-              WidgetUtils.createInputForm(
-                  "Full Name", "Enter a Full Name", nameController, false),
-              SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  fixedSize: Size(300, 30),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                WidgetUtils.createInputForm(
+                    "Email", "Enter an email", emailController, false),
+                SizedBox(height: 20),
+                WidgetUtils.createInputForm(
+                    "Password",
+                    "Password should be 8+ characters long",
+                    passwordController,
+                    true),
+                SizedBox(
+                  height: 20,
                 ),
-                onPressed: validateRegister,
-                child: Text(
-                  teacher ? 'Register as Teacher' : 'Register as Student',
-                  style: TextStyle(color: Colors.grey[900]),
+                WidgetUtils.createInputForm(
+                    "Full Name", "Enter a Full Name", nameController, false),
+                SizedBox(
+                  height: 20,
                 ),
-              ),
-              SizedBox(
-                height: 12.0,
-              ),
-              Text(
-                error,
-                style: TextStyle(color: Colors.red, fontSize: 14.0),
-              )
-            ],
+                ElevatedButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    fixedSize: Size(300, 30),
+                  ),
+                  onPressed: validateRegister,
+                  child: Text(
+                    teacher ? 'Register as Teacher' : 'Register as Student',
+                    style: TextStyle(color: Colors.grey[900]),
+                  ),
+                ),
+                SizedBox(
+                  height: 12.0,
+                ),
+                Text(
+                  error,
+                  style: TextStyle(color: Colors.red, fontSize: 14.0),
+                )
+              ],
+            ),
           ),
         ),
       ),
