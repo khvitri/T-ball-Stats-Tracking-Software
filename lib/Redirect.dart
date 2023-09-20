@@ -23,10 +23,10 @@ class Wrapper extends StatelessWidget {
               return Loading();
             }
             if (snapshot.data?.teacher == true) {
-              return Home();
+              return TeacherHome();
             }
             if (snapshot.data?.teacher == false) {
-              return SHome();
+              return StudentHome();
             }
             return Loading();
           });

@@ -25,7 +25,7 @@ class _TeacherClassroomState extends State<TeacherClassroom> {
       return Loading();
     }
     return StreamBuilder<ClassDocData>(
-        stream: DatabaseService(ID: widget.id).classroomDocumentData,
+        stream: DatabaseService(classId: widget.id).classroomDocumentData,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             var studentList = snapshot.data!.studentid;
@@ -100,7 +100,8 @@ class _TeacherClassroomState extends State<TeacherClassroom> {
                                                                   widget.id
                                                                       .toString());
                                                           await DatabaseService(
-                                                                  ID: widget.id)
+                                                                  classId:
+                                                                      widget.id)
                                                               .deleteStudentFromClassroomList(
                                                                   studentid,
                                                                   studentname);

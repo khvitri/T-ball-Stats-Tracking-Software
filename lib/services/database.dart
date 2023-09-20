@@ -3,9 +3,14 @@ import 'package:cstballprogram/models/classroom.dart';
 import 'package:cstballprogram/models/user.dart';
 
 class DatabaseService {
-  final String? uid;
-  final String? ID; //classID
-  DatabaseService({this.uid, this.ID});
+  String? uid;
+  String? classId;
+
+  DatabaseService({this.uid, this.classId});
+
+  DatabaseService.teacherId(String? uid) {
+    this.uid = uid;
+  }
 
   late final DocumentReference users =
       FirebaseFirestore.instance.collection('users').doc(uid);
@@ -96,13 +101,14 @@ class DatabaseService {
   }
 
   //Creates new classrooms
-  Future createClassroomData(
-      String id, var studentid, String classname, String teachername) async {
+  Future createClassroomData(String id, var studentid, String classname,
+      String teachername, String teacherId) async {
     return await classCollection.doc(id).set({
       'teachername': teachername,
       'id': id,
       'classname': classname,
       'studentid': studentid,
+      'teacherId': teacherId
     });
   }
 
@@ -116,7 +122,7 @@ class DatabaseService {
 
   //Add new student into classroom
   Future addNewStudent(String? studentname) async {
-    return await classCollection.doc(ID).update({
+    return await classCollection.doc(classId).update({
       'studentid': FieldValue.arrayUnion([
         {uid: studentname}
       ])
@@ -138,7 +144,7 @@ class DatabaseService {
   //Delete student from classroom's student list
   Future deleteStudentFromClassroomList(
       String studentid, String studentname) async {
-    return await classCollection.doc(ID).update({
+    return await classCollection.doc(classId).update({
       'studentid': FieldValue.arrayRemove([
         {studentid: studentname}
       ])
@@ -183,6 +189,19 @@ class DatabaseService {
     return classCollection.snapshots();
   }
 
+  Future<List<ClassDocData>> getClassList() async {
+    List<ClassDocData> results = [];
+    final classListQuery =
+        await classCollection.where("teacherId", isEqualTo: uid).get();
+    print("Successfull query for class list in Database() line 195");
+    for (var classDocSnapshot in classListQuery.docs) {
+      // TO DO: Remove print test after
+      print('${classDocSnapshot.id} => ${classDocSnapshot.data()}');
+      results.add(_classroomDocumentDataFromSnapshot(classDocSnapshot));
+    }
+    return results;
+  }
+
   ClassDocData _classroomDocumentDataFromSnapshot(DocumentSnapshot snapshot) {
     return ClassDocData(
         classname: snapshot.get('classname'),
@@ -193,7 +212,7 @@ class DatabaseService {
 
   Stream<ClassDocData> get classroomDocumentData {
     return classCollection
-        .doc(ID)
+        .doc(classId)
         .snapshots()
         .map(_classroomDocumentDataFromSnapshot);
   }

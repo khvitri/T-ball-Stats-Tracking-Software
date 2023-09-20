@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-class SHome extends StatelessWidget {
+class StudentHome extends StatelessWidget {
   final AuthService _auth = AuthService();
 
   @override
@@ -161,7 +161,8 @@ class _SideBarState extends State<SideBar> {
                                 if (inputid == x.get('id')) {
                                   await DatabaseService(uid: uid)
                                       .addSNewClass(inputid);
-                                  await DatabaseService(uid: uid, ID: inputid)
+                                  await DatabaseService(
+                                          uid: uid, classId: inputid)
                                       .addNewStudent(studentname);
                                   match = true;
                                   Navigator.of(context).pop();

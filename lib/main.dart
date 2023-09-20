@@ -16,17 +16,16 @@ Future main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<cUser?>.value(
-      initialData: null,
-      value: AuthService().loginstatus, // stream you want to listen to
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Wrapper(),
-        routes: {
-          '/sign_in': (context) => SignIn(),
-          '/register': (context) => Register(),
-        },
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: StreamProvider<cUser?>.value(
+          initialData: null,
+          value: AuthService().loginstatus, // stream you want to listen to
+          child: Wrapper()),
+      routes: {
+        '/sign_in': (context) => SignIn(),
+        '/register': (context) => Register(),
+      },
     );
   }
 }
