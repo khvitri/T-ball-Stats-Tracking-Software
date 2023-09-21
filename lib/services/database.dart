@@ -101,8 +101,8 @@ class DatabaseService {
   }
 
   //Creates new classrooms
-  Future createClassroomData(String id, var studentid, String classname,
-      String teachername, String teacherId) async {
+  Future createClassroomData(String? teachername, String id, String classname,
+      Map<String, String> studentid, String teacherId) async {
     return await classCollection.doc(id).set({
       'teachername': teachername,
       'id': id,
@@ -113,7 +113,7 @@ class DatabaseService {
   }
 
   //Adds newly created classroom's id into teacher's list of classroom
-  Future addTNewClass(String id, int numofclass) async {
+  Future addTNewClass(String id, int? numofclass) async {
     return await users.update({
       'classid': FieldValue.arrayUnion([id]),
       'numofclass': FieldValue.increment(1),
@@ -195,19 +195,23 @@ class DatabaseService {
         await classCollection.where("teacherId", isEqualTo: uid).get();
     print("Successfull query for class list in Database() line 195");
     for (var classDocSnapshot in classListQuery.docs) {
-      // TO DO: Remove print test after
-      print('${classDocSnapshot.id} => ${classDocSnapshot.data()}');
       results.add(_classroomDocumentDataFromSnapshot(classDocSnapshot));
     }
     return results;
   }
 
   ClassDocData _classroomDocumentDataFromSnapshot(DocumentSnapshot snapshot) {
+    Map<String, String> convertedStudentId = {};
+    snapshot.get('studentid').forEach((key, value) {
+      convertedStudentId[key.toString()] = value.toString();
+    });
+
     return ClassDocData(
         classname: snapshot.get('classname'),
         id: snapshot.get('id'),
-        studentid: snapshot.get('studentid'),
-        teachername: snapshot.get('teachername'));
+        studentid: convertedStudentId,
+        teachername: snapshot.get('teachername'),
+        teacherId: snapshot.get('teacherId'));
   }
 
   Stream<ClassDocData> get classroomDocumentData {

@@ -14,8 +14,6 @@ class TeacherHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loginuseruid = Provider.of<cUser?>(context);
-    Future<List<ClassDocData>> classListLoading =
-        DatabaseService.teacherId(loginuseruid?.uid).getClassList();
 
     return Scaffold(
         backgroundColor: Colors.grey[400],
@@ -60,14 +58,12 @@ class TeacherHome extends StatelessWidget {
         body: StreamProvider<TeacherData?>.value(
             value: DatabaseService(uid: loginuseruid?.uid).teacherdata,
             initialData: null,
-            child: ClassroomList(classListLoading: classListLoading)));
+            child: ClassroomList()));
   }
 }
 
+// Displays a list of the teacher's classrooms
 class ClassroomList extends StatefulWidget {
-  Future<List<ClassDocData>>? classListLoading;
-  ClassroomList({this.classListLoading});
-
   @override
   _ClassroomListState createState() => _ClassroomListState();
 }
@@ -75,21 +71,94 @@ class ClassroomList extends StatefulWidget {
 class _ClassroomListState extends State<ClassroomList> {
   bool loading = true;
   bool samedata = false;
-  String inputname = '';
   String error = '';
   final _formkey = GlobalKey<FormState>();
   late List<ClassDocData>? teacherClassList;
 
+  @override
+  Widget build(BuildContext context) {
+    final teacher = Provider.of<TeacherData?>(context);
+
+    if (loading || teacher == null || teacherClassList == null) {
+      loadClassList();
+      return Loading();
+    } else {
+      return Stack(children: [
+        ListView.builder(
+            itemCount: teacherClassList!.length,
+            itemBuilder: (BuildContext context, int index) {
+              return classroomTile(index);
+            }),
+        addNewClassroomButton(teacher)
+      ]);
+    }
+  }
+
+  // A button to add new classrooms
+  Widget addNewClassroomButton(TeacherData teacher) {
+    String classId = new DateTime.now().millisecondsSinceEpoch.toString();
+
+    return Positioned(
+        bottom: 30,
+        right: 30,
+        child: Container(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+              Container(
+                height: 70,
+                width: 70,
+                child: FloatingActionButton(
+                  foregroundColor: Colors.grey[800],
+                  backgroundColor: Colors.amber,
+                  onPressed: (() => newClassroomName(
+                      context,
+                      teacher.numofclass,
+                      AuthService().getUserUid(),
+                      classId,
+                      teacher.name)),
+                  child: Icon(
+                    Icons.add,
+                  ),
+                ),
+              ),
+            ])));
+  }
+
+  // Returns a classroom tile given the index
+  Widget classroomTile(int index) {
+    return Padding(
+      padding: EdgeInsets.only(top: 8.0),
+      child: GestureDetector(
+        child: Card(
+          margin: EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
+          child: ListTile(
+            leading: CircleAvatar(
+              radius: 25.0,
+              child: Icon(Icons.sports_baseball),
+            ),
+            title: Text('${teacherClassList![index].classname}'),
+            subtitle: Text("ID: ${teacherClassList![index].id}"),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // load teacherClassList variable
+  void loadClassList() async {
+    teacherClassList =
+        await DatabaseService.teacherId(AuthService().getUserUid())
+            .getClassList();
+    setState((() => loading = false));
+  }
+
   //Pop-up for adding new classroom
-  Future<void> newClassroomName(
-      BuildContext context,
-      var classlist,
-      String defaultname,
-      String? uid,
-      String ID,
-      int numofclass,
-      String teachername) async {
-    inputname = defaultname;
+  Future<void> newClassroomName(BuildContext context, int? numOfClass,
+      String? teacherId, String classId, String? teacherName) async {
+    final classNameController =
+        TextEditingController(text: "New Classroom $numOfClass");
     return await showDialog(
         context: context,
         builder: (context) {
@@ -102,15 +171,12 @@ class _ClassroomListState extends State<ClassroomList> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextFormField(
-                      initialValue: defaultname,
+                      controller: classNameController,
                       style: TextStyle(color: Colors.amber),
                       validator: (val) =>
                           val!.isEmpty ? 'Please enter a name' : null,
                       decoration:
                           textInputDecoration.copyWith(hintText: 'Class Name'),
-                      onChanged: (val) {
-                        inputname = val;
-                      },
                     ),
                     SizedBox(
                       height: 20,
@@ -125,11 +191,10 @@ class _ClassroomListState extends State<ClassroomList> {
                   TextButton(
                       onPressed: () async {
                         if (_formkey.currentState!.validate()) {
-                          setState(() {
-                            samedata = false;
-                          });
-                          for (var x in classlist) {
-                            if (inputname == x[0]) {
+                          setState(() => samedata = false);
+                          for (ClassDocData classroom in teacherClassList!) {
+                            if (classNameController.text ==
+                                classroom.classname) {
                               setState(() {
                                 error = 'Classroom Name Already Exist!';
                                 samedata = true;
@@ -137,10 +202,21 @@ class _ClassroomListState extends State<ClassroomList> {
                             }
                           }
                           if (samedata == false) {
-                            await DatabaseService(uid: uid)
-                                .addTNewClass(ID, numofclass);
+                            ClassDocData newClass = ClassDocData(
+                                classname: classNameController.text,
+                                id: classId,
+                                studentid: Map<String, String>(),
+                                teachername: teacherName,
+                                teacherId: teacherId);
+                            setState(() => teacherClassList?.add(newClass));
+                            await DatabaseService(uid: teacherId)
+                                .addTNewClass(classId, numOfClass);
                             await DatabaseService().createClassroomData(
-                                ID, [], inputname, teachername, uid!);
+                                teacherName,
+                                classId,
+                                classNameController.text,
+                                Map<String, String>(),
+                                teacherId!);
                             Navigator.pop(context);
                           }
                         }
@@ -151,46 +227,5 @@ class _ClassroomListState extends State<ClassroomList> {
             );
           });
         });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final teacher = Provider.of<TeacherData?>(context);
-    String classId = new DateTime.now().millisecondsSinceEpoch.toString();
-
-    if (loading || teacher == null || teacherClassList == null) {
-      loadClassList();
-      return Loading();
-    } else {
-      return Stack(
-        children: [
-          ListView.builder(
-              itemCount: teacherClassList!.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: GestureDetector(
-                    child: Card(
-                      margin: EdgeInsets.fromLTRB(20.0, 6.0, 20.0, 0.0),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          radius: 25.0,
-                          child: Icon(Icons.sports_baseball),
-                        ),
-                        title: Text('${teacherClassList![index].classname}'),
-                        subtitle: Text("ID: ${teacherClassList![index].id}"),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-        ],
-      );
-    }
-  }
-
-  void loadClassList() async {
-    teacherClassList = await widget.classListLoading;
-    setState((() => loading = false));
   }
 }

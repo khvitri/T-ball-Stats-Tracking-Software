@@ -6,6 +6,11 @@ import 'package:cstballprogram/screens/authenticate/authenticate.dart';
 class AuthService {
   final FirebaseAuth _fAuth = FirebaseAuth.instance;
 
+  String? getUserUid() {
+    // Is this an asynchronous action
+    return _fAuth.currentUser?.uid;
+  }
+
   // create user obj based on FirebaseUser
   cUser? _userFromFirebaseUser(User? user) {
     return user != null ? cUser(uid: user.uid) : null;

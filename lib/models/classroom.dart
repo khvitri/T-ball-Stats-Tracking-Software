@@ -1,7 +1,13 @@
 class ClassDocData {
   String? classname;
   String? id;
-  var studentid;
+  Map<String, String>? studentid;
   String? teachername;
-  ClassDocData({this.classname, this.id, this.studentid, this.teachername});
+  String? teacherId;
+  ClassDocData(
+      {required this.classname,
+      required this.id,
+      required this.studentid,
+      required this.teachername,
+      required this.teacherId});
 }
