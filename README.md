@@ -1,6 +1,6 @@
-# cstballprogram
+# T-ball stats tracking app
 
-A new Flutter project.
+This is a app used to track the stats of T-ball players to enhance their training regimes.
 
 ## Getting Started
 
