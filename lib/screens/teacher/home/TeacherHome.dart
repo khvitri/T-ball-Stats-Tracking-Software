@@ -1,7 +1,7 @@
+import 'package:cstballprogram/customWidgets/NonMtInputForm.dart';
 import 'package:cstballprogram/models/classroom.dart';
 import 'package:cstballprogram/models/user.dart';
 import 'package:cstballprogram/services/auth.dart';
-import 'package:cstballprogram/shared/constant.dart';
 import 'package:cstballprogram/shared/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +9,6 @@ import 'package:cstballprogram/services/database.dart';
 import 'package:provider/provider.dart';
 
 class TeacherHome extends StatelessWidget {
-  final AuthService _auth = AuthService();
-
   @override
   Widget build(BuildContext context) {
     final loginuseruid = Provider.of<cUser?>(context);
@@ -27,38 +25,40 @@ class TeacherHome extends StatelessWidget {
           centerTitle: false,
           backgroundColor: Colors.grey[800],
           elevation: 0.0,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextButton.icon(
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.amber),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6.0),
-                  )),
-                ),
-                onPressed: () async {
-                  await _auth.logOut();
-                },
-                icon: Icon(
-                  Icons.person,
-                  color: Colors.grey[800],
-                ),
-                label: Text('Logout',
-                    style: GoogleFonts.lato(
-                      textStyle:
-                          TextStyle(color: Colors.grey[800], fontSize: 15.0),
-                    )),
-              ),
-            )
-          ],
+          actions: [_logoutButton()],
         ),
         body: StreamProvider<TeacherData?>.value(
             value: DatabaseService(uid: loginuseruid?.uid).teacherdata,
             initialData: null,
             child: ClassroomList()));
+  }
+
+  Widget _logoutButton() {
+    final AuthService _auth = AuthService();
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextButton.icon(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(Colors.amber),
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+              RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6.0),
+          )),
+        ),
+        onPressed: () async {
+          await _auth.logOut();
+        },
+        icon: Icon(
+          Icons.person,
+          color: Colors.grey[800],
+        ),
+        label: Text('Logout',
+            style: GoogleFonts.lato(
+              textStyle: TextStyle(color: Colors.grey[800], fontSize: 15.0),
+            )),
+      ),
+    );
   }
 }
 
@@ -70,9 +70,9 @@ class ClassroomList extends StatefulWidget {
 
 class _ClassroomListState extends State<ClassroomList> {
   bool loading = true;
-  bool samedata = false;
-  String error = '';
   final _formkey = GlobalKey<FormState>();
+  String error = '';
+
   late List<ClassDocData>? teacherClassList;
 
   @override
@@ -80,54 +80,30 @@ class _ClassroomListState extends State<ClassroomList> {
     final teacher = Provider.of<TeacherData?>(context);
 
     if (loading || teacher == null || teacherClassList == null) {
-      loadClassList();
+      _loadClassList();
       return Loading();
     } else {
       return Stack(children: [
         ListView.builder(
             itemCount: teacherClassList!.length,
             itemBuilder: (BuildContext context, int index) {
-              return classroomTile(index);
+              return _classroomTile(index);
             }),
-        addNewClassroomButton(teacher)
+        _addNewClassroomButton(teacher)
       ]);
     }
   }
 
-  // A button to add new classrooms
-  Widget addNewClassroomButton(TeacherData teacher) {
-    String classId = new DateTime.now().millisecondsSinceEpoch.toString();
-
-    return Positioned(
-        bottom: 30,
-        right: 30,
-        child: Container(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-              Container(
-                height: 70,
-                width: 70,
-                child: FloatingActionButton(
-                  foregroundColor: Colors.grey[800],
-                  backgroundColor: Colors.amber,
-                  onPressed: (() => newClassroomName(
-                      context,
-                      teacher.numofclass,
-                      AuthService().getUserUid(),
-                      classId,
-                      teacher.name)),
-                  child: Icon(
-                    Icons.add,
-                  ),
-                ),
-              ),
-            ])));
+  // load teacherClassList variable
+  void _loadClassList() async {
+    teacherClassList =
+        await DatabaseService.teacherId(AuthService().getUserUid())
+            .getClassList();
+    setState((() => loading = false));
   }
 
   // Returns a classroom tile given the index
-  Widget classroomTile(int index) {
+  Widget _classroomTile(int index) {
     return Padding(
       padding: EdgeInsets.only(top: 8.0),
       child: GestureDetector(
@@ -146,20 +122,41 @@ class _ClassroomListState extends State<ClassroomList> {
     );
   }
 
-  // load teacherClassList variable
-  void loadClassList() async {
-    teacherClassList =
-        await DatabaseService.teacherId(AuthService().getUserUid())
-            .getClassList();
-    setState((() => loading = false));
+  // A button to add new classrooms
+  Widget _addNewClassroomButton(TeacherData teacher) {
+    return Positioned(
+        bottom: 30,
+        right: 30,
+        child: Container(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+              Container(
+                height: 70,
+                width: 70,
+                child: FloatingActionButton(
+                  foregroundColor: Colors.grey[800],
+                  backgroundColor: Colors.amber,
+                  onPressed: (() => _newClassroomName(
+                      context,
+                      teacher.numofclass,
+                      AuthService().getUserUid(),
+                      teacher.name)),
+                  child: Icon(
+                    Icons.add,
+                  ),
+                ),
+              ),
+            ])));
   }
 
-  //Pop-up for adding new classroom
-  Future<void> newClassroomName(BuildContext context, int? numOfClass,
-      String? teacherId, String classId, String? teacherName) async {
+  // Pop-up for adding new classroom
+  Future<void> _newClassroomName(BuildContext context, int? numOfClass,
+      String? teacherId, String? teacherName) {
     final classNameController =
         TextEditingController(text: "New Classroom $numOfClass");
-    return await showDialog(
+    return showDialog(
         context: context,
         builder: (context) {
           return StatefulBuilder(builder: (context, setState) {
@@ -170,14 +167,12 @@ class _ClassroomListState extends State<ClassroomList> {
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextFormField(
-                      controller: classNameController,
-                      style: TextStyle(color: Colors.amber),
-                      validator: (val) =>
-                          val!.isEmpty ? 'Please enter a name' : null,
-                      decoration:
-                          textInputDecoration.copyWith(hintText: 'Class Name'),
-                    ),
+                    NonMtInputForm(
+                        textColor: Colors.grey[750],
+                        hintText: "Class Name",
+                        validationMsg: "Please enter a name",
+                        controller: classNameController,
+                        isTextObscure: false),
                     SizedBox(
                       height: 20,
                     ),
@@ -189,43 +184,40 @@ class _ClassroomListState extends State<ClassroomList> {
                 ),
                 actions: [
                   TextButton(
-                      onPressed: () async {
-                        if (_formkey.currentState!.validate()) {
-                          setState(() => samedata = false);
-                          for (ClassDocData classroom in teacherClassList!) {
-                            if (classNameController.text ==
-                                classroom.classname) {
-                              setState(() {
-                                error = 'Classroom Name Already Exist!';
-                                samedata = true;
-                              });
-                            }
-                          }
-                          if (samedata == false) {
-                            ClassDocData newClass = ClassDocData(
-                                classname: classNameController.text,
-                                id: classId,
-                                studentid: Map<String, String>(),
-                                teachername: teacherName,
-                                teacherId: teacherId);
-                            setState(() => teacherClassList?.add(newClass));
-                            await DatabaseService(uid: teacherId)
-                                .addTNewClass(classId, numOfClass);
-                            await DatabaseService().createClassroomData(
-                                teacherName,
-                                classId,
-                                classNameController.text,
-                                Map<String, String>(),
-                                teacherId!);
-                            Navigator.pop(context);
-                          }
-                        }
-                      },
+                      onPressed: () => _processClassnameInput(
+                          classNameController.text,
+                          numOfClass,
+                          teacherId,
+                          teacherName),
                       child: Text("Create New Classroom"))
                 ],
               ),
             );
           });
         });
+  }
+
+  // validates the classname input and creates a new classroom document on
+  // firebase
+  void _processClassnameInput(String inputName, int? numOfClass,
+      String? teacherId, String? teacherName) async {
+    String classId = new DateTime.now().millisecondsSinceEpoch.toString();
+    _formkey.currentState!.validate();
+    if (teacherClassList!
+        .map((classroom) => classroom.classname)
+        .contains(inputName)) {
+      setState(() => error = 'Classroom Name Already Exist!');
+    }
+    ClassDocData newClass = ClassDocData(
+        classname: inputName,
+        id: classId,
+        studentid: Map<String, String>(),
+        teachername: teacherName,
+        teacherId: teacherId);
+    setState(() => teacherClassList?.add(newClass));
+    Navigator.pop(context);
+    await DatabaseService(uid: teacherId).addTNewClass(classId, numOfClass);
+    await DatabaseService().createClassroomData(
+        teacherName, classId, inputName, Map<String, String>(), teacherId!);
   }
 }

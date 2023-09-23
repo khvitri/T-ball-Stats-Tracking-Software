@@ -1,7 +1,7 @@
+import 'package:cstballprogram/customWidgets/NonMtInputForm.dart';
 import 'package:cstballprogram/screens/authenticate/authenticate.dart';
 import 'package:cstballprogram/services/auth.dart';
 import 'package:cstballprogram/shared/loading.dart';
-import 'package:cstballprogram/utility/widgetUtils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -47,19 +47,28 @@ class _RegisterState extends State<Register> {
             child: Column(
               children: [
                 SizedBox(height: 20),
-                WidgetUtils.createInputForm(
-                    "Email", "Enter an email", emailController, false),
+                NonMtInputForm(
+                    textColor: Colors.amber,
+                    hintText: "Email",
+                    validationMsg: "Enter an email",
+                    controller: emailController,
+                    isTextObscure: false),
                 SizedBox(height: 20),
-                WidgetUtils.createInputForm(
-                    "Password",
-                    "Password should be 8+ characters long",
-                    passwordController,
-                    true),
+                NonMtInputForm(
+                    textColor: Colors.amber,
+                    hintText: "Password",
+                    validationMsg: "Password should be 8+ characters long",
+                    controller: passwordController,
+                    isTextObscure: true),
                 SizedBox(
                   height: 20,
                 ),
-                WidgetUtils.createInputForm(
-                    "Full Name", "Enter a Full Name", nameController, false),
+                NonMtInputForm(
+                    textColor: Colors.amber,
+                    hintText: "Full Name",
+                    validationMsg: "Enter a Full Name",
+                    controller: nameController,
+                    isTextObscure: false),
                 SizedBox(
                   height: 20,
                 ),
@@ -89,6 +98,7 @@ class _RegisterState extends State<Register> {
     );
   }
 
+  // validates the register information of the user
   void validateRegister() async {
     if (_formkey.currentState!.validate()) {
       setState(() => loading = true);
