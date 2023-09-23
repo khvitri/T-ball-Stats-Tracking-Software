@@ -130,14 +130,14 @@ class DatabaseService {
   }
 
   //Delete clasroom's ID from student's list and teacher's list
-  Future deleteCIDfromUserCList(String classID) async {
+  Future deleteUserClassroom(String? classID) async {
     return await users.update({
       'classid': FieldValue.arrayRemove([classID])
     });
   }
 
   //Delete classroom's document
-  Future deleteClassroomDocument(String classID) async {
+  Future deleteClassroomDocument(String? classID) async {
     return await classCollection.doc(classID).delete();
   }
 
@@ -209,7 +209,7 @@ class DatabaseService {
     return ClassDocData(
         classname: snapshot.get('classname'),
         id: snapshot.get('id'),
-        studentid: convertedStudentId,
+        studentidsMap: convertedStudentId,
         teachername: snapshot.get('teachername'),
         teacherId: snapshot.get('teacherId'));
   }

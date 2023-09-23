@@ -33,6 +33,7 @@ class TeacherHome extends StatelessWidget {
             child: ClassroomList()));
   }
 
+  // button to logout
   Widget _logoutButton() {
     final AuthService _auth = AuthService();
 
@@ -114,12 +115,58 @@ class _ClassroomListState extends State<ClassroomList> {
               radius: 25.0,
               child: Icon(Icons.sports_baseball),
             ),
-            title: Text('${teacherClassList![index].classname}'),
+            trailing: Container(
+              height: 40,
+              width: 40,
+              child: FloatingActionButton(
+                heroTag: "deletebtn$index",
+                elevation: 0,
+                foregroundColor: Colors.red,
+                backgroundColor: Colors.white,
+                child: Icon(Icons.delete),
+                onPressed: () => _deleteClassroom(index),
+              ),
+            ),
+            title: Text("${teacherClassList![index].classname}"),
             subtitle: Text("ID: ${teacherClassList![index].id}"),
           ),
         ),
       ),
     );
+  }
+
+  // button to delete classroom
+  void _deleteClassroom(int index) {
+    String? _teacherId = AuthService().getUserUid();
+    ClassDocData classroom = teacherClassList![index];
+
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: Text("Delete?"),
+              content: Text("Classroom will be permanently deleted."),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      setState(() => teacherClassList!.remove(classroom));
+                      Navigator.pop(context);
+                      await DatabaseService(uid: _teacherId)
+                          .deleteUserClassroom(classroom.id);
+                      for (String studentId in classroom.studentidsMap!.keys) {
+                        await DatabaseService(uid: studentId)
+                            .deleteUserClassroom(studentId);
+                      }
+                      await DatabaseService()
+                          .deleteClassroomDocument(classroom.id);
+                    },
+                    child: Text("Yes")),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("No"))
+              ],
+            ));
   }
 
   // A button to add new classrooms
@@ -211,7 +258,7 @@ class _ClassroomListState extends State<ClassroomList> {
     ClassDocData newClass = ClassDocData(
         classname: inputName,
         id: classId,
-        studentid: Map<String, String>(),
+        studentidsMap: Map<String, String>(),
         teachername: teacherName,
         teacherId: teacherId);
     setState(() => teacherClassList?.add(newClass));
