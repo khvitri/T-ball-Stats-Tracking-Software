@@ -1,6 +1,7 @@
 import 'package:cstballprogram/customWidgets/NonMtInputForm.dart';
 import 'package:cstballprogram/models/classroom.dart';
 import 'package:cstballprogram/models/user.dart';
+import 'package:cstballprogram/screens/teacher/classroom/TeacherClassroom.dart';
 import 'package:cstballprogram/services/auth.dart';
 import 'package:cstballprogram/shared/loading.dart';
 import 'package:flutter/material.dart';
@@ -131,6 +132,14 @@ class _ClassroomListState extends State<ClassroomList> {
             subtitle: Text("ID: ${teacherClassList![index].id}"),
           ),
         ),
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => StreamProvider<ClassDocData>.value(
+                  value: DatabaseService(classId: teacherClassList![index].id)
+                      .classroomDocumentData,
+                  initialData: teacherClassList![index],
+                  child: TeacherClassroom())));
+        },
       ),
     );
   }
@@ -161,10 +170,7 @@ class _ClassroomListState extends State<ClassroomList> {
                     },
                     child: Text("Yes")),
                 TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("No"))
+                    onPressed: () => Navigator.pop(context), child: Text("No"))
               ],
             ));
   }

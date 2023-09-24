@@ -122,11 +122,9 @@ class DatabaseService {
 
   //Add new student into classroom
   Future addNewStudent(String? studentname) async {
-    return await classCollection.doc(classId).update({
-      'studentid': FieldValue.arrayUnion([
-        {uid: studentname}
-      ])
-    });
+    return await classCollection
+        .doc(classId)
+        .update({"studentid.$uid": studentname});
   }
 
   //Delete clasroom's ID from student's list and teacher's list
@@ -142,13 +140,10 @@ class DatabaseService {
   }
 
   //Delete student from classroom's student list
-  Future deleteStudentFromClassroomList(
-      String studentid, String studentname) async {
-    return await classCollection.doc(classId).update({
-      'studentid': FieldValue.arrayRemove([
-        {studentid: studentname}
-      ])
-    });
+  Future deleteStudentFromClassroomList(String studentid) async {
+    return await classCollection
+        .doc(classId)
+        .update({"studentid.$studentid": FieldValue.delete()});
   }
 
   //Delete data input
