@@ -220,10 +220,6 @@ class DatabaseService {
     return StudentData(
       name: snapshot.get('name'),
       feedback: snapshot.get('feedback'),
-      accList: snapshot.get('accList'),
-      effectList: snapshot.get('effectList'),
-      speedList: snapshot.get('speedList'),
-      distanceList: snapshot.get('distanceList'),
       accuracy: snapshot.get('acc'),
       speed: snapshot.get('speed'),
       effect: snapshot.get('effectiveness'),

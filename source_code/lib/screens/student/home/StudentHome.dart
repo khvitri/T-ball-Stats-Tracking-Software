@@ -17,19 +17,7 @@ class StudentHome extends StatelessWidget {
   Widget build(BuildContext context) {
     final loginuseruid = Provider.of<cUser?>(context);
 
-    return MultiProvider(
-      providers: [
-        StreamProvider<StudentData?>.value(
-            value: DatabaseService(uid: loginuseruid?.uid).studentdata,
-            initialData: null,
-            catchError: (context, error) => null),
-        StreamProvider<QuerySnapshot?>.value(
-          value: DatabaseService().classroomCollectionData,
-          initialData: null,
-          catchError: (context, error) => null,
-        )
-      ],
-      child: Scaffold(
+    return Scaffold(
         drawer: SideBar(),
         backgroundColor: Colors.grey[400],
         appBar: AppBar(
@@ -88,10 +76,7 @@ class StudentHome extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        body: Stats(),
-      ),
-    );
+        ));
   }
 }
 

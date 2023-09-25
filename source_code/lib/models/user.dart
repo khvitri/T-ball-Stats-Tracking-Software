@@ -20,24 +20,16 @@ class TeacherData {
 class StudentData {
   final String? name;
   var feedback;
-  var accList;
-  var effectList;
-  var speedList;
-  var distanceList;
   final double? accuracy;
   final double? speed;
   final double? effect;
   final double? distance;
-  var datainput;
+  final List<Map<String, String>>? datainput;
   var classid;
   final bool? teacher;
   StudentData({
     this.name,
     this.feedback,
-    this.accList,
-    this.effectList,
-    this.speedList,
-    this.distanceList,
     this.accuracy,
     this.speed,
     this.effect,

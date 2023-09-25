@@ -9,15 +9,15 @@ import 'package:cstballprogram/shared/stats.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class TeacherStudentStat extends StatefulWidget {
+class ViewStudentStat extends StatefulWidget {
   String? studentname;
   String? studentid;
-  TeacherStudentStat({this.studentname, this.studentid});
+  ViewStudentStat({this.studentname, this.studentid});
   @override
-  _TeacherStudentStatState createState() => _TeacherStudentStatState();
+  _ViewStudentStatState createState() => _ViewStudentStatState();
 }
 
-class _TeacherStudentStatState extends State<TeacherStudentStat> {
+class _ViewStudentStatState extends State<ViewStudentStat> {
   String? page = '';
 
   @override
@@ -55,9 +55,7 @@ class _TeacherStudentStatState extends State<TeacherStudentStat> {
                                             .studentdata,
                                     initialData: null,
                                     catchError: (context, error) => null,
-                                    child: TeacherInputStudentData(
-                                      studentid: widget.studentid,
-                                    ))));
+                                    child: InputData())));
                   }
                   if (pageinput == 'Input Feedback') {
                     Navigator.push(
@@ -78,10 +76,7 @@ class _TeacherStudentStatState extends State<TeacherStudentStat> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => EditInputData(
-                                  studentname: widget.studentname,
-                                  studentid: widget.studentid,
-                                )));
+                            builder: (context) => EditInputData()));
                   }
                   if (pageinput == 'Edit Feedback') {
                     Navigator.push(
